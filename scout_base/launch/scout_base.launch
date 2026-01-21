@@ -1,15 +1,14 @@
 <launch>
-    <!-- 
-        Scout Base 底层驱动启动文件
-        修改记录: 
-        将 base_frame 默认值修改为 "base_footprint"，以支持标准的 REP-105 TF树结构。
-    -->
+    <!-- 基础参数定义 -->
     <arg name="port_name" default="can0" />
     <arg name="is_scout_mini" default="false" />
     <arg name="is_scout_omni" default="false" />
     <arg name="simulated_robot" default="false" />
     <arg name="odom_topic_name" default="odom" />
     <arg name="pub_tf" default="true" />
+    
+    <!-- [新增] 引入 base_frame 参数，默认指向 base_footprint -->
+    <arg name="base_frame" default="base_footprint" /> 
 
     <node name="scout_base_node" pkg="scout_base" type="scout_base_node" output="screen" required="true">
         <param name="is_scout_mini" type="bool" value="$(arg is_scout_mini)" />
@@ -18,14 +17,10 @@
         <param name="simulated_robot" type="bool" value="$(arg simulated_robot)" />
         <param name="odom_frame" type="string" value="odom" />
         
-        <!-- 【核心修改点】 -->
-        <!-- 原代码: value="base_link" -->
-        <!-- 修改为: value="base_footprint" -->
-        <!-- 作用: 让里程计发布 odom -> base_footprint 的变换 -->
-        <param name="base_frame" type="string" value="base_footprint" />
+        <!-- [修改] 使用参数变量，不再硬编码为 base_link -->
+        <param name="base_frame" type="string" value="$(arg base_frame)" />
         
         <param name="odom_topic_name" type="string" value="$(arg odom_topic_name)" />
         <param name="pub_tf" type="bool" value="$(arg pub_tf)" />
     </node>
-
 </launch>

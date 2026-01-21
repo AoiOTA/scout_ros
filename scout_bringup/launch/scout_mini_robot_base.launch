@@ -1,17 +1,17 @@
 <launch>
-    <!-- 
-       【修改点 1】: 将 pub_tf 的 default 改为 "true"
-       这样每次启动都会自动发布 odom -> base_link 的 TF
-    -->
+    <!-- [修改] 将 value 改为 default，避免锁死 CAN 口名称，方便调试 -->
     <arg name="port_name" default="can0" />
-    <arg name="simulated_robot" default="false" />
+    
+    <arg name="simulated_robot" value="false" />
     <arg name="model_xacro" default="$(find scout_description)/urdf/scout_v2.xacro" />
     <arg name="odom_topic_name" default="odom" />
+    <arg name="is_scout_mini" default="true" />
     
-    <!-- 确保这里是 true (Mini车型) -->
-    <arg name="is_scout_mini" default="true" /> 
-    <!-- 核心修改：改为 true -->
-    <arg name="pub_tf" default="true" /> 
+    <!-- [修改] 默认为 true。导航必须开启底盘 TF 发布 -->
+    <arg name="pub_tf" default="true" />
+    
+    <!-- [新增] 顶层暴露 base_frame 接口 -->
+    <arg name="base_frame" default="base_footprint" />
 
     <include file="$(find scout_base)/launch/scout_base.launch">
         <arg name="port_name" default="$(arg port_name)" />
@@ -19,10 +19,12 @@
         <arg name="odom_topic_name" default="$(arg odom_topic_name)" />
         <arg name="is_scout_mini" default="$(arg is_scout_mini)" />
         <arg name="pub_tf" default="$(arg pub_tf)" />
+        
+        <!-- [新增] 将 base_frame 参数传递给底层 -->
+        <arg name="base_frame" value="$(arg base_frame)" />
     </include>
 
     <!--include file="$(find scout_description)/launch/description.launch">
         <arg name="model_xacro" default="$(arg model_xacro)" />
     </include-->
-
 </launch>
