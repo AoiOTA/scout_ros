@@ -1,20 +1,18 @@
 <launch>
     <!-- 
-        The robot can be controlled either through CAN bus or UART port. Make sure the hardware
-        interface is set up correctly before attempting to connect to the robot.
-        
-        You only need to specify the port name, such as "can0", "/dev/ttyUSB0". The port should 
-        operate with the following configuration:
-        
-        * CAN bus: 500k
-        * UART: 115200, Parity None, 8-bit Data, 1 Stop Bit 
+        The robot can be controlled either through CAN bus or UART port.
     -->
     <arg name="port_name" default="can0" />
     <arg name="is_scout_mini" default="false" />
     <arg name="is_scout_omni" default="false" />
     <arg name="simulated_robot" default="false" />
     <arg name="odom_topic_name" default="odom" />
-    <arg name="pub_tf" default="$(arg pub_tf)" />
+    
+    <!-- 
+       【修改点 2】: 将这里的 default 也改为 "true"
+       防止上层文件没传参数时，这里意外变成 false
+    -->
+    <arg name="pub_tf" default="true" />
 
     <node name="scout_base_node" pkg="scout_base" type="scout_base_node" output="screen" required="true">
         <param name="is_scout_mini" type="bool" value="$(arg is_scout_mini)" />
