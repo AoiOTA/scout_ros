@@ -24,7 +24,7 @@
         <arg name="base_frame" value="$(arg base_frame)" />
     </include>
     <!-- 取消注释 模型加载模块 -->
-    <include file="$(find scout_description)/launch/description.launch">
+    <include file="$(find scout_description)/launch/display_scout_mini.launch">
         <arg name="model_xacro" default="$(arg model_xacro)" />
     </include>
 </launch>
