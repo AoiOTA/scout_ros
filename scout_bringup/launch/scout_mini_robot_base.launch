@@ -1,30 +1,53 @@
 <launch>
-    <!-- [修改] 将 value 改为 default，避免锁死 CAN 口名称，方便调试 -->
+    <!-- [CAN 设置] -->
     <arg name="port_name" default="can0" />
-    
     <arg name="simulated_robot" value="false" />
-    <arg name="model_xacro" default="$(find scout_description)/urdf/scout_v2.xacro" />
+
+    <!-- 
+      [关键修正 1: 模型文件路径] 
+      修正为 scout_mini.urdf.xacro (基于你的实际文件结构)
+    -->
+    <arg name="model_xacro" default="$(find scout_description)/urdf/scout_mini.urdf.xacro" />
+
+    <!-- [基础参数] -->
     <arg name="odom_topic_name" default="odom" />
     <arg name="is_scout_mini" default="true" />
     
-    <!-- [修改] 默认为 true。导航必须开启底盘 TF 发布 -->
+    <!-- [TF 设置] 开启 TF 发布，指定 base_footprint -->
     <arg name="pub_tf" default="true" />
-    
-    <!-- [新增] 顶层暴露 base_frame 接口 -->
     <arg name="base_frame" default="base_footprint" />
 
+    <!-- 
+      =========================================================
+      1. 启动 Scout 底盘核心驱动
+      =========================================================
+    -->
     <include file="$(find scout_base)/launch/scout_base.launch">
         <arg name="port_name" default="$(arg port_name)" />
         <arg name="simulated_robot" default="$(arg simulated_robot)" />
         <arg name="odom_topic_name" default="$(arg odom_topic_name)" />
         <arg name="is_scout_mini" default="$(arg is_scout_mini)" />
         <arg name="pub_tf" default="$(arg pub_tf)" />
-        
-        <!-- [新增] 将 base_frame 参数传递给底层 -->
         <arg name="base_frame" value="$(arg base_frame)" />
     </include>
-    <!-- 取消注释 模型加载模块 -->
-    <include file="$(find scout_description)/launch/display_scout_mini.launch">
-        <arg name="model_xacro" default="$(arg model_xacro)" />
-    </include>
+
+    <!-- 
+      =========================================================
+      2. 加载机器人模型 (关键修正 2)
+      =========================================================
+      不再调用 display_scout_mini.launch，而是直接在这里执行加载逻辑。
+    -->
+
+    <!-- A. 解析 URDF/Xacro 文件并上传到参数服务器 /robot_description -->
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg model_xacro)'" />
+
+    <!-- B. 启动状态发布节点 
+         作用: 根据 /robot_description 发布静态 TF (如车轮相对于车身的位置)
+    -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- 
+      注意: 不需要启动 joint_state_publisher_gui (滑块控制)，
+      因为真实的 joint_states 数据是由上面的 scout_base 驱动从 CAN 总线读取并发布的。
+    -->
 </launch>
