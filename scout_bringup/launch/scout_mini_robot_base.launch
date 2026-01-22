@@ -5,15 +5,13 @@
 
     <!-- 
       [关键修正 1: 模型文件路径] 
-      修正为 scout_mini.urdf.xacro (基于你的实际文件结构)
+      使用你确认存在的 scout_mini.urdf.xacro
     -->
     <arg name="model_xacro" default="$(find scout_description)/urdf/scout_mini.urdf.xacro" />
 
     <!-- [基础参数] -->
     <arg name="odom_topic_name" default="odom" />
     <arg name="is_scout_mini" default="true" />
-    
-    <!-- [TF 设置] 开启 TF 发布，指定 base_footprint -->
     <arg name="pub_tf" default="true" />
     <arg name="base_frame" default="base_footprint" />
 
@@ -33,21 +31,22 @@
 
     <!-- 
       =========================================================
-      2. 加载机器人模型 (关键修正 2)
+      2. 加载机器人模型 & 发布状态
       =========================================================
-      不再调用 display_scout_mini.launch，而是直接在这里执行加载逻辑。
     -->
 
-    <!-- A. 解析 URDF/Xacro 文件并上传到参数服务器 /robot_description -->
+    <!-- A. 解析 URDF 文件并上传到 /robot_description -->
     <param name="robot_description" command="$(find xacro)/xacro '$(arg model_xacro)'" />
 
-    <!-- B. 启动状态发布节点 
-         作用: 根据 /robot_description 发布静态 TF (如车轮相对于车身的位置)
-    -->
+    <!-- B. 启动 robot_state_publisher (负责发布 TF 树) -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
     <!-- 
-      注意: 不需要启动 joint_state_publisher_gui (滑块控制)，
-      因为真实的 joint_states 数据是由上面的 scout_base 驱动从 CAN 总线读取并发布的。
+      [关键修正 3: 新增 Joint State Publisher]
+      注意: 这里使用的是 "joint_state_publisher" 而不是 "..._gui"
+      作用: 自动发布轮子的关节状态(默认为0)。这样即使底盘驱动没发数据，
+           Rviz 里的轮子也能正常显示，不会报错，也不会弹出烦人的手动控制窗口。
     -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
 </launch>
