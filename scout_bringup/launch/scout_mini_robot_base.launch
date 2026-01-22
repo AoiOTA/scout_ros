@@ -23,8 +23,8 @@
         <!-- [新增] 将 base_frame 参数传递给底层 -->
         <arg name="base_frame" value="$(arg base_frame)" />
     </include>
-
-    <!--include file="$(find scout_description)/launch/description.launch">
+    <!-- 取消注释 模型加载模块 -->
+    <include file="$(find scout_description)/launch/description.launch">
         <arg name="model_xacro" default="$(arg model_xacro)" />
-    </include-->
+    </include>
 </launch>
